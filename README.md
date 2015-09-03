@@ -4,7 +4,7 @@
 
 # Laravel Followers
 
-Simple way to associate Eloquent models in Laravel 5.
+Build a Follower system or simply associate Eloquent models in Laravel 5.
 
 ## Installation
 

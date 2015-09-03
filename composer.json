@@ -1,6 +1,6 @@
 {
     "name": "vendocrat/laravel-followers",
-    "description": "Simple way to associate Eloquent models in Laravel 5.",
+    "description": "Build a Follower system or simply associate Eloquent models in Laravel 5.",
     "homepage" : "https://github.com/vendocrat/laravel-followers",
     "license": "MIT",
     "keywords": [
