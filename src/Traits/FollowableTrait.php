@@ -29,8 +29,7 @@ trait FollowableTrait
 	 */
 	public function addFollower( Model $follower )
 	{
-		if ( $isFollower = $this->isFollower($follower) !== false )
-		{
+		if ( $hasFollower = $this->hasFollower($follower) !== false ) {
 			throw new AlreadyFollowingException( get_class($follower) .'::'. $follower->id .' is already following '. get_class($this) .'::'. $this->id );
 		}
 
@@ -54,7 +53,7 @@ trait FollowableTrait
 	 */
 	public function deleteFollower( Model $follower )
 	{
-		if ( $isFollower = $this->isFollower($follower) === true )
+		if ( $hasFollower = $this->hasFollower($follower) === true )
 		{
 			return Followable::follower( $follower )
 				->following( $this )
@@ -68,7 +67,7 @@ trait FollowableTrait
 	 * @param Model $follower
 	 * @return bool
 	 */
-	public function isFollower( Model $follower )
+	public function hasFollower( Model $follower )
 	{
 		$query = Followable::follower( $follower )
 			->following( $this );
