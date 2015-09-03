@@ -2,14 +2,14 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class Follower extends Model
+class Followable extends Model
 {
 	/**
 	 * The database table used by the model.
 	 *
 	 * @var string
 	 */
-	protected $table = 'followers';
+	protected $table = 'followables';
 
 	/**
 	 * The attributes that are mass assignable.
@@ -35,7 +35,7 @@ class Follower extends Model
 	 *
 	 * @var array
 	 */
-	protected $dates = [];
+	protected $dates = ['deleted_at'];
 
 	/**
 	 * Morph followables
@@ -49,21 +49,25 @@ class Follower extends Model
 
 	/**
 	 * @param $query
-	 * @param $business_id
+	 * @param Model $followable
 	 * @return mixed
 	 */
-	public function scopeFollowing( $query, $business_id )
+	public function scopeFollowing( $query, Model $followable )
 	{
-		return $query->where( 'business_id', '=', $business_id );
+		return $query
+			->where( 'followable_id', '=', $followable->id )
+			->where( 'followable_type', '=', get_class($followable) );
 	}
 
 	/**
 	 * @param $query
-	 * @param $user_id
+	 * @param Model $follower
 	 * @return mixed
 	 */
-	public function scopeFollower( $query, $user_id )
+	public function scopeFollower( $query, Model $follower )
 	{
-		return $query->where( 'user_id', '=', $user_id );
+		return $query
+			->where( 'follower_id', '=', $follower->id )
+			->where( 'follower_type', '=', get_class($follower) );
 	}
 }

@@ -1,4 +1,4 @@
 <?php
 return [
-	'table' => 'followers'
+	'table' => 'followables'
 ];

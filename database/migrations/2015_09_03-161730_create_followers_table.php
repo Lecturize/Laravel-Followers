@@ -36,6 +36,7 @@ class FollowersTable extends Migration
             $table->string('followable_type');
 
             $table->timestamps();
+            $table->softDeletes();
 		});
     }
 
