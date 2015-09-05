@@ -4,7 +4,9 @@
 
 # Laravel Followers
 
-Build a Follower system or simply associate Eloquent models in Laravel 5.
+Build a poly-morph Follower system or simply associate Eloquent models in Laravel 5.
+
+**Attention:** This package is a work in progress, please use with care and be sure to report any issues!
 
 ## Installation
 
