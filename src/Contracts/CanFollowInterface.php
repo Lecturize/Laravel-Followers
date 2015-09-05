@@ -2,5 +2,5 @@
 
 interface CanFollowInterface
 {
-	public function following();
+//	public function following();
 }

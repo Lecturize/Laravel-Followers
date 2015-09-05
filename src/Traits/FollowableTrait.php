@@ -10,13 +10,26 @@ use Illuminate\Database\Eloquent\Model;
 trait FollowableTrait
 {
 	/**
-	 * Get all followers for this model
+	 * Get all followable items this model morphs to as being followed
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
+	 * @return \Illuminate\Database\Eloquent\Relations\MorphMany
 	 */
-	public function followers()
+	public function follower()
 	{
-		return $this->morphMany('vendocrat\Followers\Models\Followable', 'followable');
+		return $this->morphMany('vendocrat\Followers\Models\Followable', 'follower');
+	}
+
+	/**
+	 * @param $query
+	 * @return mixed
+	 */
+	public function scopeFollowers( $query )
+	{
+		$model = $this;
+		return $query->whereHas('follower', function($q) use($model) {
+			$q->where('followable_id', $model->id);
+			$q->where('followable_type', get_class($model));
+		});
 	}
 
 	/**
@@ -33,9 +46,11 @@ trait FollowableTrait
 			throw new AlreadyFollowingException( get_class($follower) .'::'. $follower->id .' is already following '. get_class($this) .'::'. $this->id );
 		}
 
-		if ( $followers = $follower->following() )
+		if ( $follower->followable() )
 		{
-			return $followers->create([
+			return Followable::create([
+				'follower_id'     => $follower->id,
+				'follower_type'   => get_class($follower),
 				'followable_id'   => $this->id,
 				'followable_type' => get_class($this),
 			]);
@@ -55,7 +70,7 @@ trait FollowableTrait
 	{
 		if ( $hasFollower = $this->hasFollower($follower) === true )
 		{
-			return Followable::follower( $follower )
+			return Followable::followedBy( $follower )
 				->following( $this )
 				->delete();
 		}
@@ -69,7 +84,7 @@ trait FollowableTrait
 	 */
 	public function hasFollower( Model $follower )
 	{
-		$query = Followable::follower( $follower )
+		$query = Followable::followedBy( $follower )
 			->following( $this );
 
 		return $query->count() > 0;
@@ -78,16 +93,37 @@ trait FollowableTrait
 	/**
 	 * @return mixed
 	 */
-	public function getFollowers()
+	public function getFollowerCount()
 	{
-		return $this->followers()->get();
+		$followers = Followable::
+			  where('followable_id',   $this->id)
+			->where('followable_type', get_class($this))
+		//	->where( 'follower_type', 'like', '%'. $type .'%' );
+			->get();
+
+		return $followers->count();
 	}
 
 	/**
+	 * @param string $type
 	 * @return mixed
 	 */
-	public function getFollowersCount()
+	public function getFollowers( $type = '' )
 	{
-		return $this->followers->count();
+		$followers = Followable::
+			  where('followable_id',   $this->id)
+			->where('followable_type', get_class($this))
+		//	->where( 'follower_type', 'like', '%'. $type .'%' );
+			->get();
+
+		$return = array();
+
+		foreach ( $followers as $follower )
+		{
+		//	$return[] = $follower->follower()->first();
+			$return[] = $follower->follower()->first();
+		}
+
+		return collect($return)->shuffle();
 	}
 }

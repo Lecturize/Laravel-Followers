@@ -2,5 +2,5 @@
 
 interface FollowableInterface
 {
-	public function followers();
+//	public function followers();
 }

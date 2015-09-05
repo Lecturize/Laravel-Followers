@@ -44,7 +44,17 @@ class Followable extends Model
 	 */
 	public function followable()
 	{
-		return $this->morphTo();
+		return $this->belongsTo($this->followable_type);
+	}
+
+	/**
+	 * Morph followers
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+	 */
+	public function follower()
+	{
+		return $this->belongsTo($this->follower_type);
 	}
 
 	/**
@@ -55,7 +65,7 @@ class Followable extends Model
 	public function scopeFollowing( $query, Model $followable )
 	{
 		return $query
-			->where( 'followable_id', '=', $followable->id )
+			->where( 'followable_id',   '=', $followable->id )
 			->where( 'followable_type', '=', get_class($followable) );
 	}
 
@@ -64,10 +74,10 @@ class Followable extends Model
 	 * @param Model $follower
 	 * @return mixed
 	 */
-	public function scopeFollower( $query, Model $follower )
+	public function scopeFollowedBy( $query, Model $follower )
 	{
 		return $query
-			->where( 'follower_id', '=', $follower->id )
+			->where( 'follower_id',   '=', $follower->id )
 			->where( 'follower_type', '=', get_class($follower) );
 	}
 }
