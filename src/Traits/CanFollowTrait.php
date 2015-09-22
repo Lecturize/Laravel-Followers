@@ -7,6 +7,10 @@ use vendocrat\Followers\Models\Followable;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class CanFollowTrait
+ * @package vendocrat\Followers\Traits
+ */
 trait CanFollowTrait
 {
 	/**
@@ -71,7 +75,8 @@ trait CanFollowTrait
 	{
 		if ( $isFollower = $this->isFollowing($followable) === true )
 		{
-			return Followable::following( $followable )
+			return Followable::
+				  following( $followable )
 				->followedBy( $this )
 				->delete();
 		}
@@ -80,12 +85,13 @@ trait CanFollowTrait
 	}
 
 	/**
-	 * @param Model $followable
+	 * @param $followable
 	 * @return bool
 	 */
-	public function isFollowing( Model $followable )
+	public function isFollowing( $followable )
 	{
-		$query = Followable::following( $followable )
+		$query = Followable::
+			  following( $followable )
 			->followedBy( $this );
 
 		return $query->count() > 0;
@@ -106,24 +112,79 @@ trait CanFollowTrait
 	}
 
 	/**
+	 * @param int $limit
 	 * @param string $type
 	 * @return mixed
 	 */
-	public function getFollowing( $type = '' )
+	public function getFollowing( $limit = 0, $type = '' )
 	{
-		$followables = Followable::
-			  where('follower_id',   $this->id)
-			->where('follower_type', get_class($this))
-		//	->where( 'followable_type', 'like', '%'. $type .'%' );
-			->get();
+		if ( $type ) {
+			$followables = Followable::
+				  where('follower_id',   $this->id)
+				->where('follower_type', get_class($this))
+				->where('followable_type', 'like', '%'. $type .'%')
+				->get();
+		} else {
+			$followables = Followable::
+				  where('follower_id',   $this->id)
+				->where('follower_type', get_class($this))
+				->get();
+		}
 
 		$return = array();
-
 		foreach ( $followables as $followable )
 		{
 			$return[] = $followable->followable()->first();
 		}
 
-		return collect($return)->shuffle();
+		$collection = collect($return)->shuffle();
+
+		if ( $limit == 0 )
+			return $collection;
+
+		return $collection->take($limit);
+	}
+
+	/**
+	 * @param int $limit
+	 * @param string $type
+	 * @return mixed
+	 */
+	public function getFollowingSuggests( $limit = 5, $type = '' )
+	{
+		if ( $type ) {
+			$followables = Followable::
+				  where('follower_id',   '<>', $this->id)
+				->where('follower_type', get_class($this))
+				->where('followable_type', 'like', '%'. $type .'%')
+				->orderBy(\DB::raw('RAND()'))
+				->take($limit)
+				->get();
+		} else {
+			$followables = Followable::
+				  where('follower_id',   '<>', $this->id)
+				->where('follower_type', get_class($this))
+				->orderBy(\DB::raw('RAND()'))
+				->take($limit)
+				->get();
+		}
+
+		$return = array();
+		foreach ( $followables as $followable )
+		{
+			$followable = $followable->followable()->first();
+
+			if ( $this->isFollowing($followable) )
+				continue;
+
+			$return[] = $followable;
+		}
+
+		$collection = collect($return)->shuffle();
+
+		if ( $limit == 0 )
+			return $collection;
+
+		return $collection->take($limit);
 	}
 }

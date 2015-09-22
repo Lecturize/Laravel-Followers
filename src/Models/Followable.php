@@ -2,6 +2,10 @@
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Followable
+ * @package vendocrat\Followers\Models
+ */
 class Followable extends Model
 {
 	/**
@@ -62,7 +66,7 @@ class Followable extends Model
 	 * @param Model $followable
 	 * @return mixed
 	 */
-	public function scopeFollowing( $query, Model $followable )
+	public function scopeFollowing( $query, $followable )
 	{
 		return $query
 			->where( 'followable_id',   '=', $followable->id )
@@ -74,7 +78,7 @@ class Followable extends Model
 	 * @param Model $follower
 	 * @return mixed
 	 */
-	public function scopeFollowedBy( $query, Model $follower )
+	public function scopeFollowedBy( $query, $follower )
 	{
 		return $query
 			->where( 'follower_id',   '=', $follower->id )

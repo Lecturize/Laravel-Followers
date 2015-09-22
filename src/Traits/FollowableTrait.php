@@ -7,6 +7,10 @@ use vendocrat\Followers\Models\Followable;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class FollowableTrait
+ * @package vendocrat\Followers\Traits
+ */
 trait FollowableTrait
 {
 	/**
@@ -70,7 +74,8 @@ trait FollowableTrait
 	{
 		if ( $hasFollower = $this->hasFollower($follower) === true )
 		{
-			return Followable::followedBy( $follower )
+			return Followable::
+				  followedBy( $follower )
 				->following( $this )
 				->delete();
 		}
@@ -79,12 +84,13 @@ trait FollowableTrait
 	}
 
 	/**
-	 * @param Model $follower
+	 * @param $follower
 	 * @return bool
 	 */
-	public function hasFollower( Model $follower )
+	public function hasFollower( $follower )
 	{
-		$query = Followable::followedBy( $follower )
+		$query = Followable::
+			  followedBy( $follower )
 			->following( $this );
 
 		return $query->count() > 0;
@@ -98,7 +104,6 @@ trait FollowableTrait
 		$followers = Followable::
 			  where('followable_id',   $this->id)
 			->where('followable_type', get_class($this))
-		//	->where( 'follower_type', 'like', '%'. $type .'%' );
 			->get();
 
 		return $followers->count();
@@ -110,17 +115,23 @@ trait FollowableTrait
 	 */
 	public function getFollowers( $type = '' )
 	{
-		$followers = Followable::
-			  where('followable_id',   $this->id)
-			->where('followable_type', get_class($this))
-		//	->where( 'follower_type', 'like', '%'. $type .'%' );
-			->get();
+		if ( $type ) {
+			$followers = Followable::
+				  where('followable_id',   $this->id)
+				->where('followable_type', get_class($this))
+				->where('follower_type', 'like', '%'. $type .'%')
+				->get();
+		} else {
+			$followers = Followable::
+				  where('followable_id',   $this->id)
+				->where('followable_type', get_class($this))
+				->get();
+		}
 
 		$return = array();
 
 		foreach ( $followers as $follower )
 		{
-		//	$return[] = $follower->follower()->first();
 			$return[] = $follower->follower()->first();
 		}
 
