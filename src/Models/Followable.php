@@ -42,13 +42,20 @@ class Followable extends Model
 	protected $dates = ['deleted_at'];
 
 	/**
+	 * The relations to eager load on every query.
+	 *
+	 * @var array
+	 */
+	protected $with = ['followable', 'follower'];
+
+	/**
 	 * Morph followables
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\MorphTo
 	 */
 	public function followable()
 	{
-		return $this->belongsTo($this->followable_type);
+		return $this->morphTo();
 	}
 
 	/**
@@ -58,7 +65,7 @@ class Followable extends Model
 	 */
 	public function follower()
 	{
-		return $this->belongsTo($this->follower_type);
+		return $this->morphTo();
 	}
 
 	/**

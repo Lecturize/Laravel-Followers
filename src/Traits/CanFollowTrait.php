@@ -18,9 +18,9 @@ trait CanFollowTrait
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\MorphMany
 	 */
-	public function followable()
+	public function followables()
 	{
-		return $this->morphMany('vendocrat\Followers\Models\Followable', 'followable');
+		return $this->morphMany(Followable::class, 'follower');
 	}
 
 	/**
@@ -30,7 +30,7 @@ trait CanFollowTrait
 	public function scopeFollows( $query )
 	{
 		$model = $this;
-		return $query->whereHas('followable', function($q) use($model) {
+		return $query->whereHas('followables', function($q) use($model) {
 			$q->where('follower_id',   $model->id);
 			$q->where('follower_type', get_class($model));
 		});
@@ -112,23 +112,16 @@ trait CanFollowTrait
 	}
 
 	/**
-	 * @param int $limit
-	 * @param string $type
+	 * @param  int    $limit
+	 * @param  string $type
 	 * @return mixed
 	 */
 	public function getFollowing( $limit = 0, $type = '' )
 	{
 		if ( $type ) {
-			$followables = Followable::
-				  where('follower_id',   $this->id)
-				->where('follower_type', get_class($this))
-				->where('followable_type', 'like', '%'. $type .'%')
-				->get();
+			$followables = $this->followables()->where('followable_type', $type)->get();
 		} else {
-			$followables = Followable::
-				  where('follower_id',   $this->id)
-				->where('follower_type', get_class($this))
-				->get();
+			$followables = $this->followables()->get();
 		}
 
 		$return = array();

@@ -20,7 +20,7 @@ trait FollowableTrait
 	 */
 	public function follower()
 	{
-		return $this->morphMany('vendocrat\Followers\Models\Followable', 'follower');
+		return $this->morphMany(Followable::class, 'followable');
 	}
 
 	/**
@@ -110,31 +110,29 @@ trait FollowableTrait
 	}
 
 	/**
-	 * @param string $type
+	 * @param  int    $limit
+	 * @param  string $type
 	 * @return mixed
 	 */
-	public function getFollowers( $type = '' )
+	public function getFollowers( $limit = 0, $type = '' )
 	{
 		if ( $type ) {
-			$followers = Followable::
-				  where('followable_id',   $this->id)
-				->where('followable_type', get_class($this))
-				->where('follower_type', 'like', '%'. $type .'%')
-				->get();
+			$followers = $this->follower()->where('follower_type', $type)->get();
 		} else {
-			$followers = Followable::
-				  where('followable_id',   $this->id)
-				->where('followable_type', get_class($this))
-				->get();
+			$followers = $this->follower()->get();
 		}
 
 		$return = array();
-
 		foreach ( $followers as $follower )
 		{
 			$return[] = $follower->follower()->first();
 		}
 
-		return collect($return)->shuffle();
+		$collection = collect($return)->shuffle();
+
+		if ( $limit == 0 )
+			return $collection;
+
+		return $collection->take($limit);
 	}
 }
