@@ -69,26 +69,26 @@ class Followable extends Model
 	}
 
 	/**
-	 * @param $query
-	 * @param Model $followable
+	 * @param  object $query
+	 * @param  Model  $followable
 	 * @return mixed
 	 */
-	public function scopeFollowing( $query, $followable )
+	public function scopeFollowing( $query, Model $followable )
 	{
 		return $query
-			->where( 'followable_id',   '=', $followable->id )
-			->where( 'followable_type', '=', get_class($followable) );
+			->where( 'followable_id',   $followable->id )
+			->where( 'followable_type', get_class($followable) );
 	}
 
 	/**
-	 * @param $query
-	 * @param Model $follower
+	 * @param  object $query
+	 * @param  Model  $follower
 	 * @return mixed
 	 */
-	public function scopeFollowedBy( $query, $follower )
+	public function scopeFollowedBy( $query, Model $follower )
 	{
 		return $query
-			->where( 'follower_id',   '=', $follower->id )
-			->where( 'follower_type', '=', get_class($follower) );
+			->where( 'follower_id',   $follower->id )
+			->where( 'follower_type', get_class($follower) );
 	}
 }

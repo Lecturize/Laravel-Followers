@@ -46,21 +46,20 @@ trait FollowableTrait
 	 */
 	public function addFollower( Model $follower )
 	{
-		if ( $hasFollower = $this->hasFollower($follower) !== false ) {
+		// check if $follower is already following this
+		if ( $hasFollower = $this->hasFollower($follower) !== false )
 			throw new AlreadyFollowingException( get_class($follower) .'::'. $follower->id .' is already following '. get_class($this) .'::'. $this->id );
-		}
 
-		if ( $follower->followable() )
-		{
-			return Followable::create([
-				'follower_id'     => $follower->id,
-				'follower_type'   => get_class($follower),
-				'followable_id'   => $this->id,
-				'followable_type' => get_class($this),
-			]);
-		}
+		// check if $follower can follow (has CanFollowTrait)
+		if ( ! $follower->followables() )
+			throw new CannotBeFollowedException( get_class($follower) .'::'. $follower->id .' cannot follow this.' );
 
-		throw new CannotBeFollowedException( get_class($follower) .'::'. $follower->id .' cannot follow this.' );
+		return Followable::create([
+			'follower_id'     => $follower->id,
+			'follower_type'   => get_class($follower),
+			'followable_id'   => $this->id,
+			'followable_type' => get_class($this),
+		]);
 	}
 
 	/**
