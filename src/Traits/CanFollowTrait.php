@@ -147,8 +147,8 @@ trait CanFollowTrait
 	{
 		if ( $type ) {
 			$followables = Followable::
-				  where('follower_id',   '<>', $this->id)
-				->where('follower_type', get_class($this))
+				  where('follower_id',     '<>', $this->id)
+				->where('follower_type',   get_class($this))
 				->where('followable_type', 'like', '%'. $type .'%')
 				->orderBy(\DB::raw('RAND()'))
 				->take($limit)
@@ -173,7 +173,7 @@ trait CanFollowTrait
 			$return[] = $followable;
 		}
 
-		$collection = collect($return)->shuffle();
+		$collection = collect(array_unique($return))->shuffle();
 
 		if ( $limit == 0 )
 			return $collection;
