@@ -124,56 +124,13 @@ trait CanFollowTrait
 			$followables = $this->followables()->get();
 		}
 
-		$return = array();
+		$return = [];
 		foreach ( $followables as $followable )
 		{
 			$return[] = $followable->followable()->first();
 		}
 
 		$collection = collect($return)->shuffle();
-
-		if ( $limit == 0 )
-			return $collection;
-
-		return $collection->take($limit);
-	}
-
-	/**
-	 * @param int $limit
-	 * @param string $type
-	 * @return mixed
-	 */
-	public function getFollowingSuggests( $limit = 5, $type = '' )
-	{
-		if ( $type ) {
-			$followables = Followable::
-				  where('follower_id',     '<>', $this->id)
-				->where('follower_type',   get_class($this))
-				->where('followable_type', 'like', '%'. $type .'%')
-				->orderBy(\DB::raw('RAND()'))
-				->take($limit)
-				->get();
-		} else {
-			$followables = Followable::
-				  where('follower_id',   '<>', $this->id)
-				->where('follower_type', get_class($this))
-				->orderBy(\DB::raw('RAND()'))
-				->take($limit)
-				->get();
-		}
-
-		$return = array();
-		foreach ( $followables as $followable )
-		{
-			$followable = $followable->followable()->first();
-
-			if ( $this->isFollowing($followable) )
-				continue;
-
-			$return[] = $followable;
-		}
-
-		$collection = collect(array_unique($return))->shuffle();
 
 		if ( $limit == 0 )
 			return $collection;
