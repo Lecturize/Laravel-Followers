@@ -121,7 +121,7 @@ trait FollowableTrait
 			$followers = $this->follower()->get();
 		}
 
-		$return = array();
+		$return = [];
 		foreach ( $followers as $follower )
 		{
 			$return[] = $follower->follower()->first();
