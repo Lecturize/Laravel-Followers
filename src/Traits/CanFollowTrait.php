@@ -100,15 +100,28 @@ trait CanFollowTrait
 	/**
 	 * @return mixed
 	 */
-	public function getFollowingCount( $type = '' )
+	public function getFollowingCount()
 	{
-		$followables = Followable::
-		      where('follower_id',   $this->id)
-			->where('follower_type', get_class($this))
-			//	->where( 'followable_type', 'like', '%'. $type .'%' );
-			->get();
+		$id    = $this->id;
+		$class = get_class($this);
+		$type  = explode('\\', $class);
 
-		return $followables->count();
+		$key = 'followers.'. end($type) .'.'. $id .'.following.count';
+		$key = md5(strtolower($key));
+
+		if ( config('followers.cache.enable', true) && \Cache::has($key) )
+			return \Cache::get($key);
+
+		$followers = Followable::where('follower_id',   $id)
+							   ->where('follower_type', $class)
+							   ->get();
+
+		$count = $followers->count();
+
+		if ( config('followers.cache.enable', true) )
+			\Cache::put($key, $count, config('followers.cache.expiry', 10));
+
+		return $count;
 	}
 
 	/**

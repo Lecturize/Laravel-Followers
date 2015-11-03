@@ -1,4 +1,16 @@
 <?php
+
 return [
-	'table' => 'followables'
+	/**
+	 * Pivot Table to relate Follower and Followables
+	 */
+	'table' => 'followables',
+
+	/**
+	 * Cache follower/following counts
+	 */
+	'cache' => [
+		'enable' => true,
+		'expiry' => 10,
+	]
 ];

@@ -15,9 +15,14 @@ class FollowersServiceProvider extends ServiceProvider
 			__DIR__ .'/../config/config.php' => config_path('followers.php')
 		], 'config');
 
-		$this->publishes([
-			__DIR__ .'/../database/migrations/' => database_path('migrations')
-		], 'migrations');
+		if ( ! class_exists('CreateMediaTable') ) {
+			$timestamp = date('Y_m_d_His', time());
+
+			$this->publishes([
+				__DIR__ .'/../database/migrations/create_media_table.php.stub' =>
+					database_path('migrations/'. $timestamp .'_create_followers_table.php')
+			], 'migrations');
+		}
 	}
 
 	/**

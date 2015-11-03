@@ -88,9 +88,8 @@ trait FollowableTrait
 	 */
 	public function hasFollower( $follower )
 	{
-		$query = Followable::
-			  followedBy( $follower )
-			->following( $this );
+		$query = Followable::followedBy( $follower )
+							 ->following( $this );
 
 		return $query->count() > 0;
 	}
@@ -100,12 +99,26 @@ trait FollowableTrait
 	 */
 	public function getFollowerCount()
 	{
-		$followers = Followable::
-			  where('followable_id',   $this->id)
-			->where('followable_type', get_class($this))
-			->get();
+		$id    = $this->id;
+		$class = get_class($this);
+		$type  = explode('\\', $class);
 
-		return $followers->count();
+		$key = 'followers.'. end($type) .'.'. $id .'.follower.count';
+		$key = md5(strtolower($key));
+
+		if ( config('followers.cache.enable', true) && \Cache::has($key) )
+			return \Cache::get($key);
+
+		$followers = Followable::where('followable_id',   $id)
+							   ->where('followable_type', $class)
+							   ->get();
+
+		$count = $followers->count();
+
+		if ( config('followers.cache.enable', true) )
+			\Cache::put($key, $count, config('followers.cache.expiry', 10));
+
+		return $count;
 	}
 
 	/**
