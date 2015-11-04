@@ -53,6 +53,11 @@ trait CanFollowTrait
 
 		if ( $followable->follower() )
 		{
+			$key = $this->getFollowingCacheKey();
+
+			if ( config('followers.cache.enable', true) )
+				\Cache::forget($key);
+
 			return Followable::create([
 				'follower_id'     => $this->id,
 				'follower_type'   => get_class($this),
@@ -75,10 +80,14 @@ trait CanFollowTrait
 	{
 		if ( $isFollower = $this->isFollowing($followable) === true )
 		{
-			return Followable::
-				  following( $followable )
-				->followedBy( $this )
-				->delete();
+			$key = $this->getFollowingCacheKey();
+
+			if ( config('followers.cache.enable', true) )
+				\Cache::forget($key);
+
+			return Followable::following( $followable )
+							 ->followedBy( $this )
+							 ->delete();
 		}
 
 		throw new FollowerNotFoundException( get_class($this) .'::'. $this->id .' is not following '. get_class($followable) .'::'. $followable->id );
@@ -90,30 +99,25 @@ trait CanFollowTrait
 	 */
 	public function isFollowing( $followable )
 	{
-		$query = Followable::
-			  following( $followable )
-			->followedBy( $this );
+		$query = Followable::following( $followable )
+						   ->followedBy( $this );
 
 		return $query->count() > 0;
 	}
 
 	/**
+	 * @param  bool $get_cached
 	 * @return mixed
 	 */
-	public function getFollowingCount()
+	public function getFollowingCount( $get_cached = true )
 	{
-		$id    = $this->id;
-		$class = get_class($this);
-		$type  = explode('\\', $class);
+		$key = $this->getFollowingCacheKey();
 
-		$key = 'followers.'. end($type) .'.'. $id .'.following.count';
-		$key = md5(strtolower($key));
-
-		if ( config('followers.cache.enable', true) && \Cache::has($key) )
+		if ( $get_cached && config('followers.cache.enable', true) && \Cache::has($key) )
 			return \Cache::get($key);
 
-		$followers = Followable::where('follower_id',   $id)
-							   ->where('follower_type', $class)
+		$followers = Followable::where('follower_id',   $this->id)
+							   ->where('follower_type', get_class($this))
 							   ->get();
 
 		$count = $followers->count();
@@ -149,5 +153,20 @@ trait CanFollowTrait
 			return $collection;
 
 		return $collection->take($limit);
+	}
+
+	/**
+	 * @return string
+	 */
+	private function getFollowingCacheKey()
+	{
+		$id    = $this->id;
+		$class = get_class($this);
+		$type  = explode('\\', $class);
+
+		$key = 'followers.'. end($type) .'.'. $id .'.following.count';
+		$key = md5(strtolower($key));
+
+		return $key;
 	}
 }
