@@ -114,6 +114,7 @@ trait FollowableTrait
 		if ( $get_cached && config('followers.cache.enable', true) && \Cache::has($key) )
 			return \Cache::get($key);
 
+		$count = 0;
 		Followable::where('followable_id',   $this->id)
 				  ->where('followable_type', get_class($this))
 				  ->chunk(1000, function ($models) use (&$count) {
