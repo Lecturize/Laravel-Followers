@@ -114,11 +114,11 @@ trait FollowableTrait
 		if ( $get_cached && config('followers.cache.enable', true) && \Cache::has($key) )
 			return \Cache::get($key);
 
-		$followers = Followable::where('followable_id',   $this->id)
-							   ->where('followable_type', get_class($this))
-							   ->get();
-
-		$count = $followers->count();
+		Followable::where('followable_id',   $this->id)
+				  ->where('followable_type', get_class($this))
+				  ->chunk(1000, function ($models) use (&$count) {
+					  $count = $count + count($models);
+				  });
 
 		if ( config('followers.cache.enable', true) )
 			\Cache::put($key, $count, config('followers.cache.expiry', 10));
