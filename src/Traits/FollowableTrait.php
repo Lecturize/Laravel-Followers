@@ -107,15 +107,19 @@ trait FollowableTrait
 	 * @param  bool $get_cached
 	 * @return mixed
 	 */
-	public function getFollowerCount( $get_cached = true )
+	public function getCount( $get_cached = true, $type='followers' )
 	{
+		$countType = array(
+			'followers' => 'followable_id',
+			'followables' => 'follower_id'
+			);
 		$key = $this->getFollowerCacheKey();
 
 		if ( $get_cached && config('followers.cache.enable', true) && \Cache::has($key) )
 			return \Cache::get($key);
 
 		$count = 0;
-		Followable::where('followable_id',   $this->id)
+		Followable::where($countType[$type],   $this->id)
 				  ->where('followable_type', get_class($this))
 				  ->chunk(1000, function ($models) use (&$count) {
 					  $count = $count + count($models);
