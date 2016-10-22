@@ -1,25 +1,22 @@
-<?php namespace vendocrat\Followers\Models;
+<?php namespace Lecturize\Followers\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Followable
- * @package vendocrat\Followers\Models
+ * @package Lecturize\Followers\Models
  */
 class Followable extends Model
 {
-	/**
-	 * The database table used by the model.
-	 *
-	 * @var string
-	 */
+    /**
+     * @todo make this editable via config file
+     * @inheritdoc
+     */
 	protected $table = 'followables';
 
-	/**
-	 * The attributes that are mass assignable.
-	 *
-	 * @var array
-	 */
+    /**
+     * @inheritdoc
+     */
 	protected $fillable = [
 		'follower_id',
 		'follower_type',
@@ -27,25 +24,14 @@ class Followable extends Model
 		'followable_type',
 	];
 
-	/**
-	 * The attributes excluded from the model's JSON form.
-	 *
-	 * @var array
-	 */
-	protected $hidden = [];
-
-	/**
-	 * The attributes that should be mutated to dates.
-	 *
-	 * @var array
-	 */
+    /**
+     * @inheritdoc
+     */
 	protected $dates = ['deleted_at'];
 
-	/**
-	 * The relations to eager load on every query.
-	 *
-	 * @var array
-	 */
+    /**
+     * @inheritdoc
+     */
 	protected $with = ['followable', 'follower'];
 
 	/**

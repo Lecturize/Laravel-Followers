@@ -1,15 +1,15 @@
-<?php namespace vendocrat\Followers\Traits;
+<?php namespace Lecturize\Followers\Traits;
 
-use vendocrat\Followers\Exceptions\AlreadyFollowingException;
-use vendocrat\Followers\Exceptions\CannotBeFollowedException;
-use vendocrat\Followers\Exceptions\FollowerNotFoundException;
-use vendocrat\Followers\Models\Followable;
+use Lecturize\Followers\Exceptions\AlreadyFollowingException;
+use Lecturize\Followers\Exceptions\CannotBeFollowedException;
+use Lecturize\Followers\Exceptions\FollowerNotFoundException;
+use Lecturize\Followers\Models\Followable;
 
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class CanFollowTrait
- * @package vendocrat\Followers\Traits
+ * @package Lecturize\Followers\Traits
  */
 trait CanFollowTrait
 {
@@ -55,7 +55,7 @@ trait CanFollowTrait
 		{
 			$key = $this->getFollowingCacheKey();
 
-			if ( config('followers.cache.enable', true) )
+			if ( config('lecturize.followers.cache.enable', true) )
 				\Cache::forget($key);
 
 			return Followable::create([
@@ -82,7 +82,7 @@ trait CanFollowTrait
 		{
 			$key = $this->getFollowingCacheKey();
 
-			if ( config('followers.cache.enable', true) )
+			if ( config('lecturize.followers.cache.enable', true) )
 				\Cache::forget($key);
 
 			return Followable::following( $followable )
@@ -113,7 +113,7 @@ trait CanFollowTrait
 	{
 		$key = $this->getFollowingCacheKey();
 
-		if ( $get_cached && config('followers.cache.enable', true) && \Cache::has($key) )
+		if ( $get_cached && config('lecturize.followers.cache.enable', true) && \Cache::has($key) )
 			return \Cache::get($key);
 
 		$count = 0;
@@ -123,8 +123,8 @@ trait CanFollowTrait
 					  $count = $count + count($models);
 				  });
 
-		if ( config('followers.cache.enable', true) )
-			\Cache::put($key, $count, config('followers.cache.expiry', 10));
+		if ( config('lecturize.followers.cache.enable', true) )
+			\Cache::put($key, $count, config('lecturize.followers.cache.expiry', 10));
 
 		return $count;
 	}

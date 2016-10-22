@@ -1,17 +1,14 @@
-<?php namespace vendocrat\Followers\Facades;
+<?php namespace Lecturize\Followers\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use vendocrat\Followers\Followers;
 
 class Follower extends Facade
 {
 	/**
-	 * Get the registered name of the component.
-	 *
-	 * @return string
+     * @inheritdoc
 	 */
 	protected static function getFacadeAccessor()
 	{
-		return Followers::class;
+		return 'followers';
 	}
 }

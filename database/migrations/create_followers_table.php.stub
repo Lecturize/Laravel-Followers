@@ -15,7 +15,7 @@ class FollowersTable extends Migration
      */
     public function __construct()
     {
-        $this->table = config('followers.table');
+        $this->table = config('lecturize.followers.table', 'followables');
     }
 
     /**
