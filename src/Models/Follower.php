@@ -3,17 +3,11 @@
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Followable
+ * Class Follower
  * @package Lecturize\Followers\Models
  */
-class Followable extends Model
+class Follower extends Model
 {
-    /**
-     * @todo make this editable via config file
-     * @inheritdoc
-     */
-	protected $table = 'followables';
-
     /**
      * @inheritdoc
      */
@@ -33,6 +27,16 @@ class Followable extends Model
      * @inheritdoc
      */
 	protected $with = ['followable', 'follower'];
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->table = config('lecturize.followers.table', 'followers');
+    }
 
 	/**
 	 * Morph followables
