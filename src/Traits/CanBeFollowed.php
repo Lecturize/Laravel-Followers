@@ -3,15 +3,15 @@
 use Lecturize\Followers\Exceptions\AlreadyFollowingException;
 use Lecturize\Followers\Exceptions\CannotBeFollowedException;
 use Lecturize\Followers\Exceptions\FollowerNotFoundException;
-use Lecturize\Followers\Models\Followable;
+use Lecturize\Followers\Models\Follower;
 
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class FollowableTrait
+ * Class CanBeFollowed
  * @package Lecturize\Followers\Traits
  */
-trait FollowableTrait
+trait CanBeFollowed
 {
 	/**
 	 * Get all followable items this model morphs to as being followed
@@ -20,11 +20,11 @@ trait FollowableTrait
 	 */
 	public function follower()
 	{
-		return $this->morphMany(Followable::class, 'followable');
+		return $this->morphMany(Follower::class, 'followable');
 	}
 
 	/**
-	 * @param $query
+	 * @param  $query
 	 * @return mixed
 	 */
 	public function scopeFollowers( $query )
@@ -37,9 +37,9 @@ trait FollowableTrait
 	}
 
 	/**
-	 * Add follower
+	 * Add a follower.
 	 *
-	 * @param Model $follower
+	 * @param  Model  $follower
 	 * @return mixed
 	 * @throws AlreadyFollowingException
 	 * @throws CannotBeFollowedException
@@ -47,19 +47,19 @@ trait FollowableTrait
 	public function addFollower( Model $follower )
 	{
 		// check if $follower is already following this
-		if ( $hasFollower = $this->hasFollower($follower) !== false )
-			throw new AlreadyFollowingException( get_class($follower) .'::'. $follower->id .' is already following '. get_class($this) .'::'. $this->id );
+		if ($hasFollower = $this->hasFollower($follower) !== false)
+			throw new AlreadyFollowingException(get_class($follower) .'::'. $follower->id .' is already following '. get_class($this) .'::'. $this->id);
 
-		// check if $follower can follow (has CanFollowTrait)
-		if ( ! $follower->followables() )
-			throw new CannotBeFollowedException( get_class($follower) .'::'. $follower->id .' cannot follow this.' );
+		// check if $follower can follow (has CanFollow)
+		if (! $follower->followables())
+			throw new CannotBeFollowedException(get_class($follower) .'::'. $follower->id .' cannot follow this.');
 
 		$key = $this->getFollowerCacheKey();
 
-		if ( config('lecturize.followers.cache.enable', true) )
-			\Cache::forget($key);
+		if (config('lecturize.followers.cache.enable', true))
+			cache()->forget($key);
 
-		return Followable::create([
+		return Follower::create([
 			'follower_id'     => $follower->id,
 			'follower_type'   => get_class($follower),
 			'followable_id'   => $this->id,
@@ -68,61 +68,60 @@ trait FollowableTrait
 	}
 
 	/**
-	 * Delete follower
+	 * Delete a follower.
 	 *
-	 * @param Model $follower
+	 * @param  Model  $follower
 	 * @return mixed
 	 * @throws FollowerNotFoundException
 	 */
 	public function deleteFollower( Model $follower )
 	{
-		if ( $hasFollower = $this->hasFollower($follower) === true )
-		{
+		if ($hasFollower = $this->hasFollower($follower) === true) {
 			$key = $this->getFollowerCacheKey();
 
-			if ( config('lecturize.followers.cache.enable', true) )
-				\Cache::forget($key);
+			if (config('lecturize.followers.cache.enable', true))
+				cache()->forget($key);
 
-			return Followable::followedBy( $follower )
-							 ->following( $this )
-							 ->delete();
+			return Follower::followedBy( $follower )
+						   ->following( $this )
+                           ->delete();
 		}
 
-		throw new FollowerNotFoundException( get_class($follower) .'::'. $follower->id .' is not following '. get_class($this) .'::'. $this->id );
+		throw new FollowerNotFoundException(get_class($follower) .'::'. $follower->id .' is not following '. get_class($this) .'::'. $this->id);
 	}
 
 	/**
-	 * @param $follower
+	 * @param  $follower
 	 * @return bool
 	 */
-	public function hasFollower( $follower )
+	public function hasFollower($follower)
 	{
-		$query = Followable::followedBy( $follower )
-						   ->following( $this );
+		$query = Follower::followedBy($follower)
+						 ->following($this);
 
 		return $query->count() > 0;
 	}
 
 	/**
-	 * @param  bool $get_cached
+	 * @param  bool  $get_cached
 	 * @return mixed
 	 */
-	public function getFollowerCount( $get_cached = true )
+	public function getFollowerCount($get_cached = true)
 	{
 		$key = $this->getFollowerCacheKey();
 
-		if ( $get_cached && config('lecturize.followers.cache.enable', true) && \Cache::has($key) )
-			return \Cache::get($key);
+		if ($get_cached && config('lecturize.followers.cache.enable', true) && cache()->has($key))
+			return cache()->get($key);
 
 		$count = 0;
-		Followable::where('followable_id',   $this->id)
-				  ->where('followable_type', get_class($this))
-				  ->chunk(1000, function ($models) use (&$count) {
+		Follower::where('followable_id',   $this->id)
+				->where('followable_type', get_class($this))
+				->chunk(1000, function ($models) use (&$count) {
 					  $count = $count + count($models);
-				  });
+				});
 
-		if ( config('lecturize.followers.cache.enable', true) )
-			\Cache::put($key, $count, config('lecturize.followers.cache.expiry', 10));
+		if (config('lecturize.followers.cache.enable', true))
+			cache()->put($key, $count, config('lecturize.followers.cache.expiry', 10));
 
 		return $count;
 	}
@@ -134,21 +133,20 @@ trait FollowableTrait
 	 */
 	public function getFollowers( $limit = 0, $type = '' )
 	{
-		if ( $type ) {
+		if ($type) {
 			$followers = $this->follower()->where('follower_type', $type)->get();
 		} else {
 			$followers = $this->follower()->get();
 		}
 
 		$return = [];
-		foreach ( $followers as $follower )
-		{
+		foreach ($followers as $follower) {
 			$return[] = $follower->follower()->first();
 		}
 
 		$collection = collect($return)->shuffle();
 
-		if ( $limit == 0 )
+		if ($limit === 0)
 			return $collection;
 
 		return $collection->take($limit);
