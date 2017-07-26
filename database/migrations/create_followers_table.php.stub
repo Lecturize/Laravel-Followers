@@ -3,19 +3,24 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class FollowersTable extends Migration
+/**
+ * Class CreateFollowersTable
+ */
+class CreateFollowersTable extends Migration
 {
     /**
-     * Table name
+     * Table names.
+     *
+     * @var string  $table  The main table name for this migration.
      */
-    private $table;
+    protected $table;
 
     /**
-     * Constructor
+     * Create a new migration instance.
      */
     public function __construct()
     {
-        $this->table = config('lecturize.followers.table', 'followables');
+        $this->table = config('lecturize.followers.table', 'followers');
     }
 
     /**
@@ -29,11 +34,8 @@ class FollowersTable extends Migration
 		{
 		    $table->increments('id');
 
-            $table->integer('follower_id')->unsigned()->index();
-            $table->string('follower_type');
-
-            $table->integer('followable_id')->unsigned()->index();
-            $table->string('followable_type');
+			$table->nullableMorphs('follower');
+			$table->nullableMorphs('followable');
 
             $table->timestamps();
             $table->softDeletes();
@@ -47,7 +49,6 @@ class FollowersTable extends Migration
      */
     public function down()
     {
-        Schema::drop($this->table);
+        Schema::dropIfExists($this->table);
     }
 }
-

@@ -2,13 +2,13 @@
 
 return [
     /*
-     * Contacts
+     * Followers
      */
     'follower' => [
         /*
          * Relationship table for followers and followables
          */
-        'table' => 'followables',
+        'table' => 'followers',
 
         /*
          * Cache follower/following counts
