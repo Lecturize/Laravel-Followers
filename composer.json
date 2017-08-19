@@ -25,7 +25,7 @@
         "illuminate/database"   : ">=5.3"
     },
     "require-dev": {
-        "laravel/framework" : "5.3.*",
+        "laravel/framework" : ">=5.3",
         "mockery/mockery" : "0.9.*",
         "phpunit/phpunit" : "^6.0",
         "doctrine/dbal"   : "2.5.x"
