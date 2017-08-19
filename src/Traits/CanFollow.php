@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 trait CanFollow
 {
     /**
-     * Get all followable items this model morphs to as a follower
+     * Get all followable items this model morphs to as a follower.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -24,37 +24,22 @@ trait CanFollow
     }
 
     /**
-     * @param  $query
-     * @return mixed
-     */
-    public function scopeFollows($query)
-    {
-        $model = $this;
-        return $query->whereHas('followables', function($q) use($model) {
-            $q->where('follower_id',   $model->id);
-            $q->where('follower_type', get_class($model));
-        });
-    }
-
-    /**
-     * Follow method
+     * Follow a followable model.
      *
-     * @param  Model  $followable
+     * @param  mixed  $followable
      * @return mixed
+     *
      * @throws AlreadyFollowingException
      * @throws CannotBeFollowedException
      */
-    public function follow( Model $followable )
+    public function follow($followable)
     {
         if ($isFollower = $this->isFollowing($followable) !== false) {
             throw new AlreadyFollowingException( get_class($this) .'::'. $this->id .' is already following '. get_class($followable) .'::'. $followable->id );
         }
 
         if ($followable->follower()) {
-            $key = $this->getFollowingCacheKey();
-
-            if (config('lecturize.followers.cache.enable', true))
-                cache()->forget($key);
+            cache()->forget($this->getFollowingCacheKey());
 
             return Follower::create([
                 'follower_id'     => $this->id,
@@ -68,19 +53,17 @@ trait CanFollow
     }
 
     /**
-     * Unfollow method
+     * Unfollow a followable model.
      *
-     * @param  Model  $followable
+     * @param  mixed  $followable
      * @return mixed
+     *
      * @throws FollowerNotFoundException
      */
-    public function unfollow( Model $followable )
+    public function unfollow($followable)
     {
         if ($isFollower = $this->isFollowing($followable) === true) {
-            $key = $this->getFollowingCacheKey();
-
-            if (config('lecturize.followers.cache.enable', true))
-                cache()->forget($key);
+            cache()->forget($this->getFollowingCacheKey());
 
             return Follower::following($followable)
                            ->followedBy($this)
@@ -91,39 +74,38 @@ trait CanFollow
     }
 
     /**
-     * @param  $followable
+     * Check whether this model is following a given followable model.
+     *
+     * @param  mixed  $followable
      * @return bool
      */
-    public function isFollowing( $followable )
+    public function isFollowing($followable)
     {
         $query = Follower::following($followable)
                          ->followedBy($this);
 
-        return $query->count() > 0;
+        return (bool) $query->count() > 0;
     }
 
     /**
-     * @param  bool $get_cached
-     * @return mixed
+     * Get the following count.
+     *
+     * @return int
      */
-    public function getFollowingCount( $get_cached = true )
+    public function getFollowingCount()
     {
         $key = $this->getFollowingCacheKey();
 
-        if ($get_cached && config('lecturize.followers.cache.enable', true) && cache()->has($key))
-            return cache()->get($key);
+        return cache()->remember($key, config('lecturize.followers.cache.expiry', 10), function() {
+            $count = 0;
+            Follower::where('follower_id',   $this->id)
+                    ->where('follower_type', get_class($this))
+                    ->chunk(1000, function ($models) use (&$count) {
+                          $count = $count + count($models);
+                      });
 
-        $count = 0;
-        Follower::where('follower_id',   $this->id)
-                ->where('follower_type', get_class($this))
-                ->chunk(1000, function ($models) use (&$count) {
-                      $count = $count + count($models);
-                  });
-
-        if (config('lecturize.followers.cache.enable', true))
-            cache()->put($key, $count, config('lecturize.followers.cache.expiry', 10));
-
-        return $count;
+            return $count;
+        });
     }
 
     /**
@@ -131,7 +113,7 @@ trait CanFollow
      * @param  string  $type
      * @return mixed
      */
-    public function getFollowing( $limit = 0, $type = '' )
+    public function getFollowing($limit = 0, $type = '')
     {
         if ($type) {
             $followables = $this->followables()->where('followable_type', $type)->get();
@@ -140,9 +122,8 @@ trait CanFollow
         }
 
         $return = [];
-        foreach ($followables as $followable) {
+        foreach ($followables as $followable)
             $return[] = $followable->followable()->first();
-        }
 
         $collection = collect($return)->shuffle();
 
@@ -153,17 +134,30 @@ trait CanFollow
     }
 
     /**
+     * Get the cache key.
+     *
      * @return string
      */
     private function getFollowingCacheKey()
     {
-        $id    = $this->id;
-        $class = get_class($this);
-        $type  = explode('\\', $class);
+        $model = get_class($this);
+        $model = substr($model, strrpos($model, '\\') + 1);
+        $model = strtolower($model);
 
-        $key = 'followers.'. end($type) .'.'. $id .'.following.count';
-        $key = md5(strtolower($key));
+        return 'followers.'. $model .'.'. $this->id .'.following.count';
+    }
 
-        return $key;
+    /**
+     * Scope follows.
+     *
+     * @param  object  $query
+     * @return mixed
+     */
+    public function scopeFollows($query)
+    {
+        return $query->whereHas('followables', function($q) {
+            $q->where('follower_id',   $this->id);
+            $q->where('follower_type', get_class($this));
+        });
     }
 }

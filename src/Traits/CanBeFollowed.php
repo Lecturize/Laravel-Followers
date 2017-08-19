@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 trait CanBeFollowed
 {
     /**
-     * Get all followable items this model morphs to as being followed
+     * Get all followable items this model morphs to as being followed.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -28,7 +28,7 @@ trait CanBeFollowed
      *
      * @param  mixed  $follower
      * @return mixed
-     *
+     +
      * @throws AlreadyFollowingException
      * @throws CannotBeFollowedException
      */
@@ -57,6 +57,7 @@ trait CanBeFollowed
      *
      * @param  mixed  $follower
      * @return mixed
+     *
      * @throws FollowerNotFoundException
      */
     public function deleteFollower($follower)
