@@ -4,7 +4,7 @@ return [
     /*
      * Followers
      */
-    'follower' => [
+    'followers' => [
         /*
          * Relationship table for followers and followables
          */
