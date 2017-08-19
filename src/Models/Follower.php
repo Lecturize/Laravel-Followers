@@ -11,22 +11,22 @@ class Follower extends Model
     /**
      * @inheritdoc
      */
-	protected $fillable = [
-		'follower_id',
-		'follower_type',
-		'followable_id',
-		'followable_type',
-	];
+    protected $fillable = [
+        'follower_id',
+        'follower_type',
+        'followable_id',
+        'followable_type',
+    ];
 
     /**
      * @inheritdoc
      */
-	protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at'];
 
     /**
      * @inheritdoc
      */
-	protected $with = ['followable', 'follower'];
+    protected $with = ['followable', 'follower'];
 
     /**
      * @inheritdoc
@@ -38,47 +38,47 @@ class Follower extends Model
         $this->table = config('lecturize.followers.table', 'followers');
     }
 
-	/**
-	 * Morph followables
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\MorphTo
-	 */
-	public function followable()
-	{
-		return $this->morphTo();
-	}
+    /**
+     * Morph followables
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
+    public function followable()
+    {
+        return $this->morphTo();
+    }
 
-	/**
-	 * Morph followers
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\MorphTo
-	 */
-	public function follower()
-	{
-		return $this->morphTo();
-	}
+    /**
+     * Morph followers
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
+    public function follower()
+    {
+        return $this->morphTo();
+    }
 
-	/**
-	 * @param  object $query
-	 * @param  Model  $followable
-	 * @return mixed
-	 */
-	public function scopeFollowing( $query, Model $followable )
-	{
-		return $query
-			->where( 'followable_id',   $followable->id )
-			->where( 'followable_type', get_class($followable) );
-	}
+    /**
+     * @param  object $query
+     * @param  Model  $followable
+     * @return mixed
+     */
+    public function scopeFollowing( $query, Model $followable )
+    {
+        return $query
+            ->where( 'followable_id',   $followable->id )
+            ->where( 'followable_type', get_class($followable) );
+    }
 
-	/**
-	 * @param  object $query
-	 * @param  Model  $follower
-	 * @return mixed
-	 */
-	public function scopeFollowedBy( $query, Model $follower )
-	{
-		return $query
-			->where( 'follower_id',   $follower->id )
-			->where( 'follower_type', get_class($follower) );
-	}
+    /**
+     * @param  object $query
+     * @param  Model  $follower
+     * @return mixed
+     */
+    public function scopeFollowedBy( $query, Model $follower )
+    {
+        return $query
+            ->where( 'follower_id',   $follower->id )
+            ->where( 'follower_type', get_class($follower) );
+    }
 }

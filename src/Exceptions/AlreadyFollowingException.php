@@ -2,5 +2,5 @@
 
 class AlreadyFollowingException extends \Exception
 {
-	//
+    //
 }

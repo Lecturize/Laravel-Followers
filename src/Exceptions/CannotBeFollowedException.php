@@ -2,5 +2,5 @@
 
 class CannotBeFollowedException extends \Exception
 {
-	//
+    //
 }

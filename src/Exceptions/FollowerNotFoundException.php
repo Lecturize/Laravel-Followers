@@ -2,5 +2,5 @@
 
 class FollowerNotFoundException extends \Exception
 {
-	//
+    //
 }

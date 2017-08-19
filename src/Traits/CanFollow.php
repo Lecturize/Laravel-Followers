@@ -13,157 +13,157 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait CanFollow
 {
-	/**
-	 * Get all followable items this model morphs to as a follower
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-	 */
-	public function followables()
-	{
-		return $this->morphMany(Follower::class, 'follower');
-	}
+    /**
+     * Get all followable items this model morphs to as a follower
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function followables()
+    {
+        return $this->morphMany(Follower::class, 'follower');
+    }
 
-	/**
-	 * @param  $query
-	 * @return mixed
-	 */
-	public function scopeFollows($query)
-	{
-		$model = $this;
-		return $query->whereHas('followables', function($q) use($model) {
-			$q->where('follower_id',   $model->id);
-			$q->where('follower_type', get_class($model));
-		});
-	}
+    /**
+     * @param  $query
+     * @return mixed
+     */
+    public function scopeFollows($query)
+    {
+        $model = $this;
+        return $query->whereHas('followables', function($q) use($model) {
+            $q->where('follower_id',   $model->id);
+            $q->where('follower_type', get_class($model));
+        });
+    }
 
-	/**
-	 * Follow method
-	 *
-	 * @param  Model  $followable
-	 * @return mixed
-	 * @throws AlreadyFollowingException
-	 * @throws CannotBeFollowedException
-	 */
-	public function follow( Model $followable )
-	{
-		if ($isFollower = $this->isFollowing($followable) !== false) {
-			throw new AlreadyFollowingException( get_class($this) .'::'. $this->id .' is already following '. get_class($followable) .'::'. $followable->id );
-		}
+    /**
+     * Follow method
+     *
+     * @param  Model  $followable
+     * @return mixed
+     * @throws AlreadyFollowingException
+     * @throws CannotBeFollowedException
+     */
+    public function follow( Model $followable )
+    {
+        if ($isFollower = $this->isFollowing($followable) !== false) {
+            throw new AlreadyFollowingException( get_class($this) .'::'. $this->id .' is already following '. get_class($followable) .'::'. $followable->id );
+        }
 
-		if ($followable->follower()) {
-			$key = $this->getFollowingCacheKey();
+        if ($followable->follower()) {
+            $key = $this->getFollowingCacheKey();
 
-			if (config('lecturize.followers.cache.enable', true))
-				cache()->forget($key);
+            if (config('lecturize.followers.cache.enable', true))
+                cache()->forget($key);
 
-			return Follower::create([
-				'follower_id'     => $this->id,
-				'follower_type'   => get_class($this),
-				'followable_id'   => $followable->id,
-				'followable_type' => get_class($followable),
-			]);
-		}
+            return Follower::create([
+                'follower_id'     => $this->id,
+                'follower_type'   => get_class($this),
+                'followable_id'   => $followable->id,
+                'followable_type' => get_class($followable),
+            ]);
+        }
 
-		throw new CannotBeFollowedException(get_class($followable) .'::'. $followable->id .' cannot be followed.');
-	}
+        throw new CannotBeFollowedException(get_class($followable) .'::'. $followable->id .' cannot be followed.');
+    }
 
-	/**
-	 * Unfollow method
-	 *
-	 * @param  Model  $followable
-	 * @return mixed
-	 * @throws FollowerNotFoundException
-	 */
-	public function unfollow( Model $followable )
-	{
-		if ($isFollower = $this->isFollowing($followable) === true) {
-			$key = $this->getFollowingCacheKey();
+    /**
+     * Unfollow method
+     *
+     * @param  Model  $followable
+     * @return mixed
+     * @throws FollowerNotFoundException
+     */
+    public function unfollow( Model $followable )
+    {
+        if ($isFollower = $this->isFollowing($followable) === true) {
+            $key = $this->getFollowingCacheKey();
 
-			if (config('lecturize.followers.cache.enable', true))
-				cache()->forget($key);
+            if (config('lecturize.followers.cache.enable', true))
+                cache()->forget($key);
 
-			return Follower::following($followable)
-						   ->followedBy($this)
-						   ->delete();
-		}
+            return Follower::following($followable)
+                           ->followedBy($this)
+                           ->delete();
+        }
 
-		throw new FollowerNotFoundException(get_class($this) .'::'. $this->id .' is not following '. get_class($followable) .'::'. $followable->id);
-	}
+        throw new FollowerNotFoundException(get_class($this) .'::'. $this->id .' is not following '. get_class($followable) .'::'. $followable->id);
+    }
 
-	/**
-	 * @param  $followable
-	 * @return bool
-	 */
-	public function isFollowing( $followable )
-	{
-		$query = Follower::following($followable)
-						 ->followedBy($this);
+    /**
+     * @param  $followable
+     * @return bool
+     */
+    public function isFollowing( $followable )
+    {
+        $query = Follower::following($followable)
+                         ->followedBy($this);
 
-		return $query->count() > 0;
-	}
+        return $query->count() > 0;
+    }
 
-	/**
-	 * @param  bool $get_cached
-	 * @return mixed
-	 */
-	public function getFollowingCount( $get_cached = true )
-	{
-		$key = $this->getFollowingCacheKey();
+    /**
+     * @param  bool $get_cached
+     * @return mixed
+     */
+    public function getFollowingCount( $get_cached = true )
+    {
+        $key = $this->getFollowingCacheKey();
 
-		if ($get_cached && config('lecturize.followers.cache.enable', true) && cache()->has($key))
-			return cache()->get($key);
+        if ($get_cached && config('lecturize.followers.cache.enable', true) && cache()->has($key))
+            return cache()->get($key);
 
-		$count = 0;
-		Follower::where('follower_id',   $this->id)
+        $count = 0;
+        Follower::where('follower_id',   $this->id)
                 ->where('follower_type', get_class($this))
-				->chunk(1000, function ($models) use (&$count) {
-					  $count = $count + count($models);
-				  });
+                ->chunk(1000, function ($models) use (&$count) {
+                      $count = $count + count($models);
+                  });
 
-		if (config('lecturize.followers.cache.enable', true))
-			cache()->put($key, $count, config('lecturize.followers.cache.expiry', 10));
+        if (config('lecturize.followers.cache.enable', true))
+            cache()->put($key, $count, config('lecturize.followers.cache.expiry', 10));
 
-		return $count;
-	}
+        return $count;
+    }
 
-	/**
-	 * @param  int     $limit
-	 * @param  string  $type
-	 * @return mixed
-	 */
-	public function getFollowing( $limit = 0, $type = '' )
-	{
-		if ($type) {
-			$followables = $this->followables()->where('followable_type', $type)->get();
-		} else {
-			$followables = $this->followables()->get();
-		}
+    /**
+     * @param  int     $limit
+     * @param  string  $type
+     * @return mixed
+     */
+    public function getFollowing( $limit = 0, $type = '' )
+    {
+        if ($type) {
+            $followables = $this->followables()->where('followable_type', $type)->get();
+        } else {
+            $followables = $this->followables()->get();
+        }
 
-		$return = [];
-		foreach ($followables as $followable) {
-			$return[] = $followable->followable()->first();
-		}
+        $return = [];
+        foreach ($followables as $followable) {
+            $return[] = $followable->followable()->first();
+        }
 
-		$collection = collect($return)->shuffle();
+        $collection = collect($return)->shuffle();
 
-		if ($limit == 0)
-			return $collection;
+        if ($limit == 0)
+            return $collection;
 
-		return $collection->take($limit);
-	}
+        return $collection->take($limit);
+    }
 
-	/**
-	 * @return string
-	 */
-	private function getFollowingCacheKey()
-	{
-		$id    = $this->id;
-		$class = get_class($this);
-		$type  = explode('\\', $class);
+    /**
+     * @return string
+     */
+    private function getFollowingCacheKey()
+    {
+        $id    = $this->id;
+        $class = get_class($this);
+        $type  = explode('\\', $class);
 
-		$key = 'followers.'. end($type) .'.'. $id .'.following.count';
-		$key = md5(strtolower($key));
+        $key = 'followers.'. end($type) .'.'. $id .'.following.count';
+        $key = md5(strtolower($key));
 
-		return $key;
-	}
+        return $key;
+    }
 }

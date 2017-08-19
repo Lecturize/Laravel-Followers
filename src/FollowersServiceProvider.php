@@ -8,30 +8,30 @@ class FollowersServiceProvider extends ServiceProvider
         'CreateFollowersTable' => 'create_followers_table'
     ];
 
-	/**
+    /**
      * @inheritdoc
-	 */
-	public function boot()
-	{
+     */
+    public function boot()
+    {
         $this->handleConfig();
         $this->handleMigrations();
-	}
+    }
 
-	/**
+    /**
      * @inheritdoc
-	 */
-	public function register()
-	{
-	    //
-	}
+     */
+    public function register()
+    {
+        //
+    }
 
-	/**
+    /**
      * @inheritdoc
-	 */
-	public function provides()
-	{
-		return [];
-	}
+     */
+    public function provides()
+    {
+        return [];
+    }
 
     /**
      * Publish and merge the config file.
