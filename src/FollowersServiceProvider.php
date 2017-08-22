@@ -2,6 +2,10 @@
 
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Class FollowersServiceProvider
+ * @package Lecturize\Followers
+ */
 class FollowersServiceProvider extends ServiceProvider
 {
     protected $migrations = [
