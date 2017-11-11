@@ -46,7 +46,7 @@ trait CanFollow
             $follower->follower_type = get_class($this);
             $follower->followable_id = $followable->id;
             $follower->followable_type = get_class($followable);
-            
+            $follower->save();
             return $follower;
             
             /*
