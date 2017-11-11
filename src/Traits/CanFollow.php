@@ -40,13 +40,22 @@ trait CanFollow
 
         if ($followable->follower()) {
             cache()->forget($this->getFollowingCacheKey());
-
+            
+            $follower = new Follower;
+            $follower->follower_id = $this->id;
+            $follower->follower_type = get_class($this);
+            $follower->followable_id = $followable->id;
+            $follower->followable_type = get_class($followable);
+            
+            return $follower;
+            
+            /*
             return Follower::create([
                 'follower_id'     => $this->id,
                 'follower_type'   => get_class($this),
                 'followable_id'   => $followable->id,
                 'followable_type' => get_class($followable),
-            ]);
+            ]);*/
         }
 
         throw new CannotBeFollowedException(get_class($followable) .'::'. $followable->id .' cannot be followed.');
