@@ -9,6 +9,6 @@ class Follower extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'followers';
+        return 'follower';
     }
 }
