@@ -19,6 +19,8 @@ class FollowersServiceProvider extends ServiceProvider
     {
         $this->handleConfig();
         $this->handleMigrations();
+
+        $this->loadTranslationsFrom(__DIR__ .'/../resources/lang/', 'follower');
     }
 
     /**
