@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * Class Follower
+ * @package Lecturize\Followers\Facades
+ */
 class Follower extends Facade
 {
     /**
