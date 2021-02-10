@@ -11,4 +11,12 @@ return [
         'did' => 'Following',
     ],
 
+    'activities' => [
+        'x-follows-you' => ':x follows you',
+        'you-follow-y'  => 'You follow :x',
+
+        'x-started-y' => ':x started following :y',
+        'x-stopped-y' => ':x stopped following :y',
+    ],
+
 ];
