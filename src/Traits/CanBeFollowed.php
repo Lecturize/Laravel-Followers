@@ -20,7 +20,10 @@ trait CanBeFollowed
      */
     public function follower()
     {
-        return $this->morphMany(Follower::class, 'followable');
+        return $this->morphMany(
+            config('lecturize.followers.model', Follower::class),
+            'followable'
+        );
     }
 
     /**
@@ -44,7 +47,8 @@ trait CanBeFollowed
 
         cache()->forget($this->getFollowerCacheKey());
 
-        return Follower::create([
+        $class = config('lecturize.followers.model', Follower::class);
+        return (new $class)->create([
             'follower_id'     => $follower->id,
             'follower_type'   => get_class($follower),
             'followable_id'   => $this->id,
@@ -65,9 +69,10 @@ trait CanBeFollowed
         if ($hasFollower = $this->hasFollower($follower) === true) {
             cache()->forget($this->getFollowerCacheKey());
 
-            return Follower::followedBy($follower)
-                           ->following($this)
-                           ->delete();
+            $class = config('lecturize.followers.model', Follower::class);
+            return (new $class)->followedBy($follower)
+                               ->following($this)
+                               ->delete();
         }
 
         throw new FollowerNotFoundException(get_class($follower) .'::'. $follower->id .' is not following '. get_class($this) .'::'. $this->id);
@@ -81,8 +86,9 @@ trait CanBeFollowed
      */
     public function hasFollower($follower)
     {
-        $query = Follower::followedBy($follower)
-                         ->following($this);
+        $class = config('lecturize.followers.model', Follower::class);
+        $query = (new $class)->followedBy($follower)
+                             ->following($this);
 
         return (bool) $query->count() > 0;
     }
@@ -98,11 +104,13 @@ trait CanBeFollowed
 
         return cache()->remember($key, config('lecturize.followers.cache.expiry', 10), function() {
             $count = 0;
-            Follower::where('followable_id',   $this->id)
-                    ->where('followable_type', get_class($this))
-                    ->chunk(1000, function ($models) use (&$count) {
-                          $count = $count + count($models);
-                    });
+
+            $class = config('lecturize.followers.model', Follower::class);
+            (new $class)::where('followable_id',   $this->id)
+                        ->where('followable_type', get_class($this))
+                        ->chunk(1000, function ($models) use (&$count) {
+                            $count = $count + count($models);
+                        });
 
             return $count;
         });
