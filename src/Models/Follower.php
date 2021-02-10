@@ -8,9 +8,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Follower extends Model
 {
-    /**
-     * @inheritdoc
-     */
+    /** @inheritdoc */
     protected $fillable = [
         'follower_id',
         'follower_type',
@@ -18,19 +16,18 @@ class Follower extends Model
         'followable_type',
     ];
 
-    /**
-     * @inheritdoc
-     */
-    protected $dates = ['deleted_at'];
+    /** @inheritdoc */
+    protected $dates = [
+        'deleted_at',
+    ];
 
-    /**
-     * @inheritdoc
-     */
-    protected $with = ['followable', 'follower'];
+    /** @inheritdoc */
+    protected $with = [
+        'followable',
+        'follower',
+    ];
 
-    /**
-     * @inheritdoc
-     */
+    /** @inheritdoc */
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
@@ -39,7 +36,7 @@ class Follower extends Model
     }
 
     /**
-     * Morph followables
+     * Morph followables.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
@@ -49,7 +46,7 @@ class Follower extends Model
     }
 
     /**
-     * Morph followers
+     * Morph followers.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
@@ -59,26 +56,28 @@ class Follower extends Model
     }
 
     /**
-     * @param  object $query
-     * @param  Model  $followable
+     * Query by a followable item.
+     *
+     * @param  object  $query
+     * @param  Model   $followable
      * @return mixed
      */
-    public function scopeFollowing( $query, Model $followable )
+    public function scopeFollowing($query, Model $followable)
     {
-        return $query
-            ->where( 'followable_id',   $followable->id )
-            ->where( 'followable_type', get_class($followable) );
+        return $query->where('followable_id',   $followable->id)
+                     ->where('followable_type', get_class($followable));
     }
 
     /**
-     * @param  object $query
-     * @param  Model  $follower
+     * Query by a follower.
+     *
+     * @param  object  $query
+     * @param  Model   $follower
      * @return mixed
      */
-    public function scopeFollowedBy( $query, Model $follower )
+    public function scopeFollowedBy($query, Model $follower)
     {
-        return $query
-            ->where( 'follower_id',   $follower->id )
-            ->where( 'follower_type', get_class($follower) );
+        return $query->where('follower_id',   $follower->id)
+                     ->where('follower_type', get_class($follower));
     }
 }
