@@ -4,13 +4,7 @@
 
 # Laravel Followers
 
-Build a poly-morph Follower system or simply associate Eloquent models in Laravel 5.
-
-## Important Notice
-
-**This package is a work in progress**, please use with care and feel free to report any issues or ideas you may have!
-
-We've transferred this package to a new owner and therefor updated the namespaces to **Lecturize\Followers**. The config file is now `config/lecturize.php`.
+Build a poly-morph follower system or simply associate Eloquent models in Laravel.
 
 ## Installation
 
@@ -26,25 +20,19 @@ and run `$ composer update` or both in one with `$ composer require lecturize/la
 
 Next register the service provider and (optional) facade to your `config/app.php` file
 
-```php
-'providers' => [
-    // Illuminate Providers ...
-    // App Providers ...
-    Lecturize\Followers\FollowersServiceProvider::class
-];
-```
-
 ## Configuration & Migration
 
 ```bash
 $ php artisan vendor:publish --provider="Lecturize\Followers\FollowersServiceProvider"
 ```
 
-This will create a `config/lecturize.php` and a migration file. In the config file you can customize the table names, finally you'll have to run migration like so:
+This will publish a `config/lecturize.php` and some migration files, that you'll have to run:
 
 ```bash
 $ php artisan migrate
 ```
+
+For migrations to be properly published ensure that you have added the directory `database/migrations` to the classmap in your projects `composer.json`.
 
 ## License
 
