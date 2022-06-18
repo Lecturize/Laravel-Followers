@@ -1,4 +1,6 @@
-<?php namespace Lecturize\Followers\Models;
+<?php
+
+namespace Lecturize\Followers\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

@@ -1,4 +1,6 @@
-<?php namespace Lecturize\Followers\Traits;
+<?php
+
+namespace Lecturize\Followers\Traits;
 
 use Lecturize\Followers\Exceptions\AlreadyFollowingException;
 use Lecturize\Followers\Exceptions\CannotBeFollowedException;

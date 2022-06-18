@@ -1,4 +1,6 @@
-<?php namespace Lecturize\Followers\Contracts;
+<?php
+
+namespace Lecturize\Followers\Contracts;
 
 /**
  * Interface CanBeFollowedInterface

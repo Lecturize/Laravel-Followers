@@ -1,4 +1,6 @@
-<?php namespace Lecturize\Followers\Exceptions;
+<?php
+
+namespace Lecturize\Followers\Exceptions;
 
 /**
  * Class CannotBeFollowedException

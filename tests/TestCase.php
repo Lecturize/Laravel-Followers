@@ -1,4 +1,6 @@
-<?php namespace Lecturize\Followers\Tests;
+<?php
+
+namespace Lecturize\Followers\Tests;
 
 use Lecturize\Followers\FollowersServiceProvider;
 

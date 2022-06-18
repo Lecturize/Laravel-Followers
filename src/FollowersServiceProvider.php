@@ -1,4 +1,6 @@
-<?php namespace Lecturize\Followers;
+<?php
+
+namespace Lecturize\Followers;
 
 use Illuminate\Support\ServiceProvider;
 

@@ -1,4 +1,6 @@
-<?php namespace Lecturize\Followers\Tests;
+<?php
+
+namespace Lecturize\Followers\Tests;
 
 class DemoTest extends TestCase
 {
