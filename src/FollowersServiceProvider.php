@@ -10,7 +10,7 @@ use Illuminate\Support\ServiceProvider;
  */
 class FollowersServiceProvider extends ServiceProvider
 {
-    protected $migrations = [
+    protected array $migrations = [
         'CreateFollowersTable' => 'create_followers_table'
     ];
 
@@ -34,12 +34,7 @@ class FollowersServiceProvider extends ServiceProvider
         return [];
     }
 
-    /**
-     * Publish and merge the config file.
-     *
-     * @return void
-     */
-    private function handleConfig()
+    private function handleConfig(): void
     {
         $configPath = __DIR__ . '/../config/config.php';
 
@@ -48,12 +43,7 @@ class FollowersServiceProvider extends ServiceProvider
         $this->mergeConfigFrom($configPath, 'lecturize');
     }
 
-    /**
-     * Publish migrations.
-     *
-     * @return void
-     */
-    private function handleMigrations()
+    private function handleMigrations(): void
     {
         $count = 0;
         foreach ($this->migrations as $class => $file) {
